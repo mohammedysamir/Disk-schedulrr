@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="Disk_scheduler:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>Disk_scheduler</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="Disk_scheduler-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="Disk_scheduler:war exploded" />
+    </root>
+  </artifact>
+</component>
