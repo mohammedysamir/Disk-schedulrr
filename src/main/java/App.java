@@ -12,65 +12,192 @@
 * 98, 183, 37, 122, 14, 124, 65, 67
     Initial head start cylinder: 53
 * */
+
 import java.util.*;
+
+import static java.util.Arrays.sort;
 
 
 public class App {
+    static int totalMoves = 0;
+    static String Order = "";
+
     public static void main(String[] args) {
-    Scanner scan = new Scanner(System.in);
-    System.out.print("Enter number of requests: ");
-    int no_requests=scan.nextInt();
-    int[] Requests=new int[no_requests];
-    System.out.print("\nFill the Request list");
-    for(int i=0;i<no_requests;i++){
-        int reqeust=scan.nextInt();
-        Requests[i]=reqeust;
-    }
-    System.out.print("Enter initial position of the disk head: ");
-    int initialPos=scan.nextInt();
-    System.out.print("\n");
-    //Start calling all algorithms
-        FCFS(initialPos,Requests);
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Enter number of requests: ");
+        int no_requests = scan.nextInt();
+        int[] Requests = new int[no_requests];
+
+        System.out.print("\nEnter beginning of the range: ");
+        int Begin = scan.nextInt();
+
+        System.out.print("\nEnter end of the range: ");
+        int End = scan.nextInt();
+
+        System.out.print("\nFill the Request list");
+        for (int i = 0; i < no_requests; i++) {
+            int reqeust = scan.nextInt();
+            Requests[i] = reqeust;
+        }
+
+        System.out.print("\nEnter initial position of the disk head: ");
+        int initialPos = scan.nextInt();
+
+        System.out.print("\nEnter Direction: ");
+        String Direction = scan.next();
+        System.out.print("\n");
+        //Start calling all algorithms
+          FCFS(initialPos,Requests);
 //        SSTF(initialPos,Requests);
-//        SCAN(initialPos,Requests);
-//        CSCAN(initialPos,Requests);
-//        LOOK(initialPos,Requests);
-//        CLOOK(initialPos,Requests);
+          SCAN(initialPos, Requests, Direction, Begin, End);
+//        CSCAN(initialPos,Requests,Direction,Begin,End);
+//        LOOK(initialPos,Requests,Direction,Begin,End);
+//        CLOOK(initialPos,Requests,Direction,Begin,End);
     }
-    public static void FCFS(int pos,int[] Requests){
+
+    public static void FCFS(int pos, int[] Requests) {
+        System.out.println("in FCFS algorithm");
         //move sequentially
         //copy pos and requests into new array to move seq.
-        int totalMoves=0;
-        String Order="";
-        int[] currentRequests=new int[Requests.length+1];
-        currentRequests[0]=pos;
-        for(int i=1;i<currentRequests.length;i++){
-            currentRequests[i]=Requests[i-1];
+        totalMoves = 0;
+        Order = "";
+        int[] currentRequests = new int[Requests.length + 1];
+        currentRequests[0] = pos;
+        for (int i = 1; i < currentRequests.length; i++) {
+            currentRequests[i] = Requests[i - 1];
         }
         //calculate moves
-        for(int i=1;i<currentRequests.length;i++){
-            totalMoves+= Math.abs(currentRequests[i]-currentRequests[i-1]);
-            Order+=(currentRequests[i-1])+" ";
+        for (int i = 1; i < currentRequests.length; i++) {
+            totalMoves += Math.abs(currentRequests[i] - currentRequests[i - 1]);
+            Order += (currentRequests[i - 1]) + " ";
         }
-        System.out.println("Total cylinders scanned: "+totalMoves+"\n"+"and the order of execution is: "+Order);
+        System.out.println("Total cylinders scanned: " + totalMoves + "\n" + "and the order of execution is: " + Order);
     }
 
-    public static void SSTF(int pos,int[] Requests){}
+    public static void SSTF(int pos, int[] Requests) {
+        System.out.println("in SSTF algorithm");
+        //copy pos and requests into new array to move seq.
+        totalMoves = 0;
+        Order = "";
+        int[] currentRequests = new int[Requests.length + 1];
+        currentRequests[0] = pos;
+        for (int i = 1; i < currentRequests.length; i++) {
+            currentRequests[i] = Requests[i - 1];
+        }
+        int[][] Difference = new int[Requests.length][2];
+        for (int i = 0; i < Difference.length; i++) {
+            //get differences
+            Difference[0][i] = currentRequests[i + 1] - pos; //put differences in the first row
+            totalMoves += Difference[0][i];
+            Difference[1][i] = 0; //this is an integer flag to indicate if we printed this index or not
+        }
+        //print
+        System.out.println("Total cylinders scanned: " + totalMoves + "\n" + "and the order of execution is: " + Order);
+    }
 
-    public static void SCAN(int pos,int[] Requests){}
+    public static void SCAN(int pos, int[] Requests, String Direction, int begin, int end) {
+        System.out.println("in SCAN algorithm");
+        totalMoves = 0;
+        Order = "";
+        int[] currentRequests = new int[Requests.length + 2];
+        currentRequests[0] = pos;
+        for (int i = 1; i < Requests.length; i++) {
+            currentRequests[i] = Requests[i - 1];
+        }
 
-    public static void CSCAN(int pos,int[] Requests){}
+        if (Direction.equalsIgnoreCase("Left")) {
+            //go begin then last request
+            currentRequests[currentRequests.length - 1] = begin;
+            //sort
+            Arrays.sort(currentRequests);
+            //find position to start with
+            int index = findPos(pos, currentRequests);
+            for (int i = index; i > 0; i--) {
+                //calculate first half
+                totalMoves += currentRequests[i] - currentRequests[i - 1];
+                Order += currentRequests[i] + " ";
+            }
+            for (int i = index + 1; i < currentRequests.length-1; i++) {
+                //calculate second half
+                totalMoves += Math.abs(currentRequests[i] - currentRequests[i + 1]);
+                Order += currentRequests[i] + " ";
+            }
+        }
+        else if (Direction.equalsIgnoreCase("Right")) {
+            //go to end then to first request
+            currentRequests[currentRequests.length - 1] = end;
+            //sort
+            Arrays.sort(currentRequests);
+            //find position to start with
+            int index = findPos(pos, currentRequests);
+            for (int i = index; i < currentRequests.length; i++) {
+                //calculate second half
+                totalMoves += Math.abs(currentRequests[i] - currentRequests[i + 1]);
+                Order += currentRequests[i] + " ";
+            }
+            for (int i = index - 1; i > 0; i--) {
+                //calculate first half
+                totalMoves += currentRequests[i] - currentRequests[i + 1];
+                Order += currentRequests[i] + " ";
+            }
+        }
+        else {
+            System.out.println("Invalid direction..");
+            return;
+        }
+        System.out.println("Total cylinders scanned: " + totalMoves + "\n" + "and the order of execution is: " + Order);
+    }
 
-    public static void LOOK(int pos,int[] Requests){}
+    public static void CSCAN(int pos, int[] Requests, String Direction, int begin, int end) {
+        System.out.println("in C-SCAN algorithm");
+        if (Direction.equalsIgnoreCase("Left")) {
 
-    public static void CLOOK(int pos,int[] Requests){}
+        } else if (Direction.equalsIgnoreCase("Right")) {
 
+        } else {
+            System.out.println("Invalid direction..");
+            return;
+        }
+    }
+
+    public static void LOOK(int pos, int[] Requests, String Direction, int begin, int end) {
+        System.out.println("in LOOK algorithm");
+        if (Direction.equalsIgnoreCase("Left")) {
+
+        } else if (Direction.equalsIgnoreCase("Right")) {
+
+        } else {
+            System.out.println("Invalid direction..");
+            return;
+        }
+    }
+
+    public static void CLOOK(int pos, int[] Requests, String Direction, int begin, int end) {
+        System.out.println("in C-LOOK algorithm");
+        if (Direction.equalsIgnoreCase("Left")) {
+
+        } else if (Direction.equalsIgnoreCase("Right")) {
+
+        } else {
+            System.out.println("Invalid direction..");
+            return;
+        }
+    }
+
+    public static int findPos(int pos, int[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == pos) return i;
+        }
+        return -1;
+    }
 };
 /*
 * Test case
 8
+0
+199
 98 183 37 122 14 124 65 67
-
+53
 --------------------------------------------
 * output for FCFS
 * 640
