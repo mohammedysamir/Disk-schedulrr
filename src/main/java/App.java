@@ -26,7 +26,7 @@ public class App {
         Scanner scan = new Scanner(System.in);
         System.out.print("Enter number of requests: ");
         int no_requests = scan.nextInt();
-        int[] Requests = new int[no_requests];
+        int[] Requests = new int[no_requests+1];
 
         System.out.print("\nEnter beginning of the range: ");
         int Begin = scan.nextInt();
@@ -35,13 +35,14 @@ public class App {
         int End = scan.nextInt();
 
         System.out.print("\nFill the Request list");
-        for (int i = 0; i < no_requests; i++) {
+        for (int i = 1; i < no_requests+1; i++) {
             int reqeust = scan.nextInt();
             Requests[i] = reqeust;
         }
 
         System.out.print("\nEnter initial position of the disk head: ");
         int initialPos = scan.nextInt();
+        Requests[0]=initialPos; //save initial pos in the array
 
         System.out.print("\nEnter Direction: ");
         String Direction = scan.next();
@@ -49,7 +50,7 @@ public class App {
         //Start calling all algorithms
           FCFS(initialPos,Requests);
 //        SSTF(initialPos,Requests);
-          SCAN(initialPos, Requests, Direction, Begin, End);
+//        SCAN(initialPos, Requests, Direction, Begin, End);
 //        CSCAN(initialPos,Requests,Direction,Begin,End);
 //        LOOK(initialPos,Requests,Direction,Begin,End);
 //        CLOOK(initialPos,Requests,Direction,Begin,End);
@@ -61,16 +62,13 @@ public class App {
         //copy pos and requests into new array to move seq.
         totalMoves = 0;
         Order = "";
-        int[] currentRequests = new int[Requests.length + 1];
-        currentRequests[0] = pos;
-        for (int i = 1; i < currentRequests.length; i++) {
-            currentRequests[i] = Requests[i - 1];
-        }
+        int[] currentRequests = Requests.clone();
         //calculate moves
         for (int i = 1; i < currentRequests.length; i++) {
             totalMoves += Math.abs(currentRequests[i] - currentRequests[i - 1]);
-            Order += (currentRequests[i - 1]) + " ";
+            Order += (currentRequests[i-1]) + " ";
         }
+        Order+=currentRequests[currentRequests.length-1];
         System.out.println("Total cylinders scanned: " + totalMoves + "\n" + "and the order of execution is: " + Order);
     }
 
@@ -79,18 +77,8 @@ public class App {
         //copy pos and requests into new array to move seq.
         totalMoves = 0;
         Order = "";
-        int[] currentRequests = new int[Requests.length + 1];
-        currentRequests[0] = pos;
-        for (int i = 1; i < currentRequests.length; i++) {
-            currentRequests[i] = Requests[i - 1];
-        }
-        int[][] Difference = new int[Requests.length][2];
-        for (int i = 0; i < Difference.length; i++) {
-            //get differences
-            Difference[0][i] = currentRequests[i + 1] - pos; //put differences in the first row
-            totalMoves += Difference[0][i];
-            Difference[1][i] = 0; //this is an integer flag to indicate if we printed this index or not
-        }
+        int[] currentRequests = Requests.clone();
+
         //print
         System.out.println("Total cylinders scanned: " + totalMoves + "\n" + "and the order of execution is: " + Order);
     }
@@ -99,10 +87,9 @@ public class App {
         System.out.println("in SCAN algorithm");
         totalMoves = 0;
         Order = "";
-        int[] currentRequests = new int[Requests.length + 2];
-        currentRequests[0] = pos;
-        for (int i = 1; i < Requests.length; i++) {
-            currentRequests[i] = Requests[i - 1];
+        int[] currentRequests = new int[Requests.length + 1];
+        for (int i = 0; i < Requests.length; i++) {
+            currentRequests[i] = Requests[i];
         }
 
         if (Direction.equalsIgnoreCase("Left")) {
@@ -116,12 +103,12 @@ public class App {
                 //calculate first half
                 totalMoves += currentRequests[i] - currentRequests[i - 1];
                 Order += currentRequests[i] + " ";
-            }
+            }Order+=currentRequests[0]+" "; //cause begin wasn't printed.
             for (int i = index + 1; i < currentRequests.length-1; i++) {
                 //calculate second half
                 totalMoves += Math.abs(currentRequests[i] - currentRequests[i + 1]);
                 Order += currentRequests[i] + " ";
-            }
+            }Order+=currentRequests[currentRequests.length-1]+" ";
         }
         else if (Direction.equalsIgnoreCase("Right")) {
             //go to end then to first request
